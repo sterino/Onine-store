@@ -12,7 +12,7 @@
 
 1. Клонируйте репозиторий:
     ```sh
-    git clone https://github.com/yourusername/online-store.git
+    git clone https://github.com/sterino/Onine-store.git
     cd online-store
     ```
 
