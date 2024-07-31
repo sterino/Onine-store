@@ -1,4 +1,6 @@
-CREATE TABLE IF NOT EXISTS users (
+CREATE SCHEMA IF NOT EXISTS store-users-service;
+
+CREATE TABLE IF NOT EXISTS store-users-service.users (
        id UUID PRIMARY KEY DEFAULT GEN_RANDOM_UUID(),
        name VARCHAR NOT NULL,
        email VARCHAR NOT NULL UNIQUE,
