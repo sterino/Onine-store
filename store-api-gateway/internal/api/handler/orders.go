@@ -52,8 +52,8 @@ func (o *OrderHandler) CreateOrder(c *gin.Context) {
 // @Tags orders
 // @Accept  json
 // @Produce  json
-// @Success 200 {object} map[string]interface{}
-// @Failure 500 {object} map[string]interface{}
+// @Success 200 {object} response.Response
+// @Failure 500 {object} response.Response
 // @Router /orders [get]
 func (o *OrderHandler) ListOrders(c *gin.Context) {
 	req, err := http.NewRequest("GET", o.orderUrl, nil)

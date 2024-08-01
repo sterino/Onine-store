@@ -21,9 +21,9 @@ func NewPaymentHandler(paymentUrl string) *PaymentHandler {
 // @Accept  json
 // @Produce  json
 // @Param payment body payment.Request true "Payment data"
-// @Success 201 {object} map[string]interface{}
-// @Failure 400 {object} map[string]interface{}
-// @Failure 500 {object} map[string]interface{}
+// @Success 201 {object} response.Response
+// @Failure 400 {object} response.Response
+// @Failure 500 {object} response.Response
 // @Router /payments [post]
 func (p *PaymentHandler) CreatePayment(c *gin.Context) {
 	req, err := http.NewRequest("POST", p.paymentUrl, c.Request.Body)
@@ -52,8 +52,8 @@ func (p *PaymentHandler) CreatePayment(c *gin.Context) {
 // @Tags payments
 // @Accept  json
 // @Produce  json
-// @Success 200 {object} map[string]interface{}
-// @Failure 500 {object} map[string]interface{}
+// @Success 200 {object} response.Response
+// @Failure 500 {object} response.Response
 // @Router /payments [get]
 func (p *PaymentHandler) ListPayments(c *gin.Context) {
 	req, err := http.NewRequest("GET", p.paymentUrl, nil)
@@ -83,9 +83,9 @@ func (p *PaymentHandler) ListPayments(c *gin.Context) {
 // @Accept  json
 // @Produce  json
 // @Param id path string true "Payment ID"
-// @Success 200 {object} map[string]interface{}
-// @Failure 400 {object} map[string]interface{}
-// @Failure 500 {object} map[string]interface{}
+// @Success 200 {object} response.Response
+// @Failure 400 {object} response.Response
+// @Failure 500 {object} response.Response
 // @Router /payments/{id} [get]
 func (p *PaymentHandler) GetPayment(c *gin.Context) {
 	req, err := http.NewRequest("GET", p.paymentUrl+"/"+c.Param("id"), nil)

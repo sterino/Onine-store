@@ -267,10 +267,7 @@ const docTemplate = `{
                     "type": "number"
                 },
                 "order_id": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
+                    "type": "string"
                 },
                 "user_id": {
                     "type": "string"

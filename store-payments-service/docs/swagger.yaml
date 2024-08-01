@@ -4,9 +4,7 @@ definitions:
       amount:
         type: number
       order_id:
-        items:
-          type: string
-        type: array
+        type: string
       user_id:
         type: string
     type: object
