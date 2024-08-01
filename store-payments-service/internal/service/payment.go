@@ -20,7 +20,7 @@ func NewPaymentService(repository interfaces.PaymentRepository) services.Payment
 }
 
 func (ts *PaymentService) CreatePayment(ctx context.Context, req payment.Request) (id string, err error) {
-	_, err = MakePayment(req.Amount)
+	_, err = MakePayment()
 	var status string
 	if err != nil {
 		status = "failed"

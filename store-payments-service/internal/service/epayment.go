@@ -8,67 +8,70 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"encoding/pem"
+	"errors"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"mime/multipart"
 	"net/http"
+	"payment-service/internal/domain/epayment"
 )
 
-func getToken() (string, error) {
-	tokenURL := "https://testoauth.homebank.kz/epay2/oauth2/token"
+func GetPaymentToken() (*epayment.TokenResponse, error) {
+	tokenUrl := "https://testoauth.homebank.kz/epay2/oauth2/token"
 
 	body := &bytes.Buffer{}
 	writer := multipart.NewWriter(body)
 
+	// taken test fields from website
 	writer.WriteField("grant_type", "client_credentials")
 	writer.WriteField("scope", "webapi usermanagement email_send verification statement statistics payment")
 	writer.WriteField("client_id", "test")
 	writer.WriteField("client_secret", "yF587AV9Ms94qN2QShFzVR3vFnWkhjbAK3sG")
-	writer.WriteField("invoiceId", "00000000000001")
+	writer.WriteField("invoiceID", "938290483292")
 	writer.WriteField("amount", "100")
 	writer.WriteField("currency", "KZT")
-	writer.WriteField("terminalId", "67e34d63-102f-4bd1-898e-370781d0074d")
+	writer.WriteField("terminal", "67e34d63-102f-4bd1-898e-370781d0074d")
 
-	err := writer.Close()
-	if err != nil {
-		return "", err
-	}
-	headers := map[string]string{
-		"Content-Type": writer.FormDataContentType(),
-	}
-	req, err := http.NewRequest("POST", tokenURL, body)
-	if err != nil {
-		return "", err
+	if err := writer.Close(); err != nil {
+		return nil, err
 	}
 
-	for key, value := range headers {
-		req.Header.Set(key, value)
-	}
-	res, err := http.DefaultClient.Do(req)
+	req, err := http.NewRequest(http.MethodPost, tokenUrl, body)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
-	defer res.Body.Close()
-	data, err := ioutil.ReadAll(res.Body)
+
+	req.Header.Set("Content-Type", writer.FormDataContentType())
+
+	client := &http.Client{}
+	resp, err := client.Do(req)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
-	if res.StatusCode != http.StatusOK {
-		return "", fmt.Errorf("status: %s, body: %s", res.Status, data)
-	}
-	var tokenResponse map[string]interface{}
-	err = json.Unmarshal(data, &tokenResponse)
+
+	defer resp.Body.Close()
+
+	var token epayment.TokenResponse
+
+	data, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
-	accessToken, ok := tokenResponse["access_token"].(string)
-	if !ok {
-		return "", fmt.Errorf("failed to get access token")
+
+	// check error status
+	if resp.StatusCode != http.StatusOK {
+		return nil, errors.New("error when reading response body. Status: " + resp.Status)
 	}
-	return accessToken, nil
+
+	err = json.Unmarshal(data, &token)
+	if err != nil {
+		return nil, err
+	}
+
+	return &token, nil
 }
 
-func getPublicKey() (*rsa.PublicKey, error) {
+func GetPublicKey() (*rsa.PublicKey, error) {
 	publicKeyURL := "https://testepay.homebank.kz/api/public.rsa"
 	resp, err := http.Get(publicKeyURL)
 	if err != nil {
@@ -76,7 +79,7 @@ func getPublicKey() (*rsa.PublicKey, error) {
 	}
 	defer resp.Body.Close()
 
-	body, err := ioutil.ReadAll(resp.Body)
+	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return nil, err
 	}
@@ -96,7 +99,7 @@ func getPublicKey() (*rsa.PublicKey, error) {
 }
 
 func encryptData() (string, error) {
-	publicKey, err := getPublicKey()
+	publicKey, err := GetPublicKey()
 	if err != nil {
 		return "", err
 	}
@@ -117,36 +120,29 @@ func encryptData() (string, error) {
 	return base64.StdEncoding.EncodeToString(encryptedData), nil
 }
 
-type PaymentResponse struct {
-	Status    string  `json:"status"`
-	Message   string  `json:"message"`
-	PaymentID string  `json:"payment_id"`
-	Amount    float64 `json:"amount"`
-	Currency  string  `json:"currency"`
-	InvoiceID string  `json:"invoice_id"`
-}
-
-func MakePayment(amount float64) (*PaymentResponse, error) {
+func MakePayment() (*epayment.EpaymentResponse, error) {
 	paymentUrl := "https://testepay.homebank.kz/api/payment/cryptopay"
-	token, err := getToken()
+	paymentToken, err := GetPaymentToken()
+	fmt.Println("Payment token", paymentToken.AccessToken)
+
 	if err != nil {
-		return nil, fmt.Errorf("failed to get token: %v", err)
+		return nil, fmt.Errorf("failed to get payment token: %v", err)
 	}
 
 	encryptedData, err := encryptData()
 	if err != nil {
-		return nil, fmt.Errorf("failed to encrypt data: %v", err)
+		return nil, fmt.Errorf("error when encrypting key: %v", err)
 	}
 
 	body := map[string]interface{}{
-		"amount":          amount,
+		"amount":          100,
 		"currency":        "KZT",
 		"name":            "JON JONSON",
 		"cryptogram":      encryptedData,
-		"invoiceId":       "000000001",
+		"invoiceID":       "938290483292",
 		"invoiceIdAlt":    "8564546",
 		"description":     "test payment",
-		"accountId":       "uuid000001",
+		"accountID":       "uuid000001",
 		"email":           "jj@example.com",
 		"phone":           "77777777777",
 		"cardSave":        true,
@@ -154,17 +150,15 @@ func MakePayment(amount float64) (*PaymentResponse, error) {
 		"postLink":        "https://testmerchant/order/1123",
 		"failurePostLink": "https://testmerchant/order/1123/fail",
 	}
-	jsonBody, err := json.Marshal(body)
-	if err != nil {
-		return nil, fmt.Errorf("failed to marshal body: %v", err)
-	}
 
-	req, err := http.NewRequest("POST", paymentUrl, bytes.NewBuffer(jsonBody))
+	jsonBody, _ := json.Marshal(body)
+
+	req, err := http.NewRequest(http.MethodPost, paymentUrl, bytes.NewBuffer(jsonBody))
 	if err != nil {
 		return nil, fmt.Errorf("failed to create request: %v", err)
 	}
 	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Authorization", "Bearer "+token)
+	req.Header.Set("Authorization", "Bearer "+paymentToken.AccessToken)
 
 	client := &http.Client{}
 	resp, err := client.Do(req)
@@ -172,14 +166,10 @@ func MakePayment(amount float64) (*PaymentResponse, error) {
 		return nil, fmt.Errorf("failed to perform request: %v", err)
 	}
 	defer resp.Body.Close()
-	var paymentResponse PaymentResponse
 
-	if err = json.NewDecoder(resp.Body).Decode(&paymentResponse); err != nil {
-		return nil, fmt.Errorf("failed to decode JSON response: %v", err)
-	}
-	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("status: %s, body: %s", resp.Status, paymentResponse)
-	}
-	fmt.Println(paymentResponse)
-	return &paymentResponse, nil
+	var payload epayment.EpaymentResponse
+
+	json.NewDecoder(resp.Body).Decode(&payload)
+
+	return &payload, nil
 }
