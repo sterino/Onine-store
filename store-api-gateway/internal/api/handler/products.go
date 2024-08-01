@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"api-gateway-service/pkg/response"
 	"github.com/gin-gonic/gin"
 	"io"
 	"net/http"
@@ -63,7 +64,12 @@ func (p *ProductHandler) ListProducts(c *gin.Context) {
 		return
 	}
 	defer resp.Body.Close()
-	_, err = io.Copy(c.Writer, resp.Body)
+	res, err := response.ParseResponse(resp)
+	if err != nil {
+		c.JSON(500, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(resp.StatusCode, res)
 }
 
 // GetProduct godoc
@@ -90,7 +96,12 @@ func (p *ProductHandler) GetProduct(c *gin.Context) {
 		return
 	}
 	defer resp.Body.Close()
-	_, err = io.Copy(c.Writer, resp.Body)
+	res, err := response.ParseResponse(resp)
+	if err != nil {
+		c.JSON(500, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(resp.StatusCode, res)
 }
 
 // UpdateProduct godoc
@@ -118,7 +129,12 @@ func (p *ProductHandler) UpdateProduct(c *gin.Context) {
 		return
 	}
 	defer resp.Body.Close()
-	_, err = io.Copy(c.Writer, resp.Body)
+	res, err := response.ParseResponse(resp)
+	if err != nil {
+		c.JSON(500, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(resp.StatusCode, res)
 }
 
 // DeleteProduct godoc
@@ -145,7 +161,12 @@ func (p *ProductHandler) DeleteProduct(c *gin.Context) {
 		return
 	}
 	defer resp.Body.Close()
-	_, err = io.Copy(c.Writer, resp.Body)
+	res, err := response.ParseResponse(resp)
+	if err != nil {
+		c.JSON(500, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(resp.StatusCode, res)
 }
 
 // SearchProducts godoc
@@ -172,5 +193,10 @@ func (p *ProductHandler) SearchProducts(c *gin.Context) {
 		return
 	}
 	defer resp.Body.Close()
-	_, err = io.Copy(c.Writer, resp.Body)
+	res, err := response.ParseResponse(resp)
+	if err != nil {
+		c.JSON(500, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(resp.StatusCode, res)
 }

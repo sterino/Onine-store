@@ -1,8 +1,8 @@
 package handler
 
 import (
+	"api-gateway-service/pkg/response"
 	"github.com/gin-gonic/gin"
-	"io"
 	"net/http"
 )
 
@@ -38,21 +38,12 @@ func (u *UserHandler) CreateUser(c *gin.Context) {
 		return
 	}
 	defer resp.Body.Close()
-	if resp.StatusCode == http.StatusTemporaryRedirect {
-		newURL := resp.Header.Get("Location")
-		req, err = http.NewRequest(http.MethodPost, newURL, c.Request.Body)
-		if err != nil {
-			c.JSON(500, gin.H{"error": err.Error()})
-			return
-		}
-		resp, err = client.Do(req)
-		if err != nil {
-			c.JSON(500, gin.H{"error": err.Error()})
-			return
-		}
-		defer resp.Body.Close()
+	res, err := response.ParseResponse(resp)
+	if err != nil {
+		c.JSON(500, gin.H{"error": err.Error()})
+		return
 	}
-	_, err = io.Copy(c.Writer, resp.Body)
+	c.JSON(resp.StatusCode, res)
 }
 
 // ListUsers godoc
@@ -77,7 +68,12 @@ func (u *UserHandler) ListUsers(c *gin.Context) {
 		return
 	}
 	defer resp.Body.Close()
-	_, err = io.Copy(c.Writer, resp.Body)
+	res, err := response.ParseResponse(resp)
+	if err != nil {
+		c.JSON(500, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(resp.StatusCode, res)
 }
 
 // GetUser godoc
@@ -106,7 +102,12 @@ func (u *UserHandler) GetUser(c *gin.Context) {
 		return
 	}
 	defer resp.Body.Close()
-	_, err = io.Copy(c.Writer, resp.Body)
+	res, err := response.ParseResponse(resp)
+	if err != nil {
+		c.JSON(500, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(resp.StatusCode, res)
 
 }
 
@@ -137,7 +138,12 @@ func (u *UserHandler) UpdateUser(c *gin.Context) {
 		return
 	}
 	defer resp.Body.Close()
-	_, err = io.Copy(c.Writer, resp.Body)
+	res, err := response.ParseResponse(resp)
+	if err != nil {
+		c.JSON(500, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(resp.StatusCode, res)
 }
 
 // DeleteUser godoc
@@ -166,7 +172,12 @@ func (u *UserHandler) DeleteUser(c *gin.Context) {
 		return
 	}
 	defer resp.Body.Close()
-	_, err = io.Copy(c.Writer, resp.Body)
+	res, err := response.ParseResponse(resp)
+	if err != nil {
+		c.JSON(500, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(resp.StatusCode, res)
 }
 
 // SearchUser godoc
@@ -196,5 +207,10 @@ func (u *UserHandler) SearchUser(c *gin.Context) {
 		return
 	}
 	defer resp.Body.Close()
-	_, err = io.Copy(c.Writer, resp.Body)
+	res, err := response.ParseResponse(resp)
+	if err != nil {
+		c.JSON(500, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(resp.StatusCode, res)
 }

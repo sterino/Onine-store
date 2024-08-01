@@ -1,8 +1,8 @@
 package handler
 
 import (
+	"api-gateway-service/pkg/response"
 	"github.com/gin-gonic/gin"
-	"io"
 	"net/http"
 )
 
@@ -38,7 +38,12 @@ func (o *OrderHandler) CreateOrder(c *gin.Context) {
 		return
 	}
 	defer resp.Body.Close()
-	_, err = io.Copy(c.Writer, resp.Body)
+	res, err := response.ParseResponse(resp)
+	if err != nil {
+		c.JSON(500, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(resp.StatusCode, res)
 }
 
 // ListOrders godoc
@@ -63,7 +68,12 @@ func (o *OrderHandler) ListOrders(c *gin.Context) {
 		return
 	}
 	defer resp.Body.Close()
-	_, err = io.Copy(c.Writer, resp.Body)
+	res, err := response.ParseResponse(resp)
+	if err != nil {
+		c.JSON(500, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(resp.StatusCode, res)
 }
 
 // GetOrder godoc
@@ -90,7 +100,12 @@ func (o *OrderHandler) GetOrder(c *gin.Context) {
 		return
 	}
 	defer resp.Body.Close()
-	_, err = io.Copy(c.Writer, resp.Body)
+	res, err := response.ParseResponse(resp)
+	if err != nil {
+		c.JSON(500, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(resp.StatusCode, res)
 }
 
 // UpdateOrder godoc
@@ -118,7 +133,12 @@ func (o *OrderHandler) UpdateOrder(c *gin.Context) {
 		return
 	}
 	defer resp.Body.Close()
-	_, err = io.Copy(c.Writer, resp.Body)
+	res, err := response.ParseResponse(resp)
+	if err != nil {
+		c.JSON(500, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(resp.StatusCode, res)
 }
 
 // DeleteOrder godoc
@@ -145,7 +165,12 @@ func (o *OrderHandler) DeleteOrder(c *gin.Context) {
 		return
 	}
 	defer resp.Body.Close()
-	_, err = io.Copy(c.Writer, resp.Body)
+	res, err := response.ParseResponse(resp)
+	if err != nil {
+		c.JSON(500, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(resp.StatusCode, res)
 }
 
 // SearchOrders godoc
@@ -173,5 +198,10 @@ func (o *OrderHandler) SearchOrders(c *gin.Context) {
 		return
 	}
 	defer resp.Body.Close()
-	_, err = io.Copy(c.Writer, resp.Body)
+	res, err := response.ParseResponse(resp)
+	if err != nil {
+		c.JSON(500, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(resp.StatusCode, res)
 }

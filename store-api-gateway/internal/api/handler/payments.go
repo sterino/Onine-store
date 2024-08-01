@@ -1,8 +1,8 @@
 package handler
 
 import (
+	"api-gateway-service/pkg/response"
 	"github.com/gin-gonic/gin"
-	"io"
 	"net/http"
 )
 
@@ -38,7 +38,12 @@ func (p *PaymentHandler) CreatePayment(c *gin.Context) {
 		return
 	}
 	defer resp.Body.Close()
-	_, err = io.Copy(c.Writer, resp.Body)
+	res, err := response.ParseResponse(resp)
+	if err != nil {
+		c.JSON(500, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(resp.StatusCode, res)
 }
 
 // ListPayments godoc
@@ -63,7 +68,12 @@ func (p *PaymentHandler) ListPayments(c *gin.Context) {
 		return
 	}
 	defer resp.Body.Close()
-	_, err = io.Copy(c.Writer, resp.Body)
+	res, err := response.ParseResponse(resp)
+	if err != nil {
+		c.JSON(500, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(resp.StatusCode, res)
 }
 
 // GetPayment godoc
@@ -90,8 +100,12 @@ func (p *PaymentHandler) GetPayment(c *gin.Context) {
 		return
 	}
 	defer resp.Body.Close()
-
-	_, err = io.Copy(c.Writer, resp.Body)
+	res, err := response.ParseResponse(resp)
+	if err != nil {
+		c.JSON(500, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(resp.StatusCode, res)
 }
 
 // UpdatePayment godoc
@@ -119,8 +133,12 @@ func (p *PaymentHandler) UpdatePayment(c *gin.Context) {
 		return
 	}
 	defer resp.Body.Close()
-
-	_, err = io.Copy(c.Writer, resp.Body)
+	res, err := response.ParseResponse(resp)
+	if err != nil {
+		c.JSON(500, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(resp.StatusCode, res)
 }
 
 // DeletePayment godoc
@@ -147,7 +165,12 @@ func (p *PaymentHandler) DeletePayment(c *gin.Context) {
 		return
 	}
 	defer resp.Body.Close()
-	_, err = io.Copy(c.Writer, resp.Body)
+	res, err := response.ParseResponse(resp)
+	if err != nil {
+		c.JSON(500, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(resp.StatusCode, res)
 }
 
 // SearchPayments godoc
@@ -174,5 +197,10 @@ func (p *PaymentHandler) SearchPayments(c *gin.Context) {
 		return
 	}
 	defer resp.Body.Close()
-	_, err = io.Copy(c.Writer, resp.Body)
+	res, err := response.ParseResponse(resp)
+	if err != nil {
+		c.JSON(500, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(resp.StatusCode, res)
 }
