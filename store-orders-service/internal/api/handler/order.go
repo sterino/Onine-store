@@ -71,16 +71,16 @@ func (th *OrderHandler) ListOrders(c *gin.Context) {
 	res, err := th.orderService.ListOrders(c.Request.Context())
 	if err != nil {
 		if errors.Is(err, order.ErrorNotFound) {
-			errRes := response.ClientResponse(http.StatusOK, "no products found", "", nil)
+			errRes := response.ClientResponse(http.StatusOK, "no orders found", "", nil)
 			c.JSON(http.StatusOK, errRes)
 			return
 		}
-		errRes := response.ClientResponse(http.StatusInternalServerError, "failed to list products", nil, err.Error())
+		errRes := response.ClientResponse(http.StatusInternalServerError, "failed to list orders", nil, err.Error())
 		c.JSON(http.StatusInternalServerError, errRes)
 		return
 	}
 
-	successRes := response.ClientResponse(http.StatusOK, "the products list", res, nil)
+	successRes := response.ClientResponse(http.StatusOK, "the orders list", res, nil)
 	c.JSON(http.StatusOK, successRes)
 }
 
@@ -98,7 +98,7 @@ func (th *OrderHandler) GetOrder(c *gin.Context) {
 	res, err := th.orderService.GetOrder(c.Request.Context(), id)
 	if err != nil {
 		if errors.Is(err, order.ErrorNotFound) {
-			errRes := response.ClientResponse(http.StatusOK, "no products found", "", nil)
+			errRes := response.ClientResponse(http.StatusOK, "no orders found", "", nil)
 			c.JSON(http.StatusOK, errRes)
 			return
 		}

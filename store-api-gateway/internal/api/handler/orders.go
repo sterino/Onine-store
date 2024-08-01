@@ -2,6 +2,7 @@ package handler
 
 import (
 	"github.com/gin-gonic/gin"
+	"io"
 	"net/http"
 )
 
@@ -20,9 +21,9 @@ func NewOrderHandler(orderUrl string) *OrderHandler {
 // @Accept  json
 // @Produce  json
 // @Param order body order.Request true "Order data"
-// @Success 201 {object} map[string]interface{}
-// @Failure 400 {object} map[string]interface{}
-// @Failure 500 {object} map[string]interface{}
+// @Success 201 {object} response.Response
+// @Failure 400 {object} response.Response
+// @Failure 500 {object} response.Response
 // @Router /orders [post]
 func (o *OrderHandler) CreateOrder(c *gin.Context) {
 	req, err := http.NewRequest("POST", o.orderUrl, c.Request.Body)
@@ -37,7 +38,7 @@ func (o *OrderHandler) CreateOrder(c *gin.Context) {
 		return
 	}
 	defer resp.Body.Close()
-	c.JSON(resp.StatusCode, resp)
+	_, err = io.Copy(c.Writer, resp.Body)
 }
 
 // ListOrders godoc
@@ -62,7 +63,7 @@ func (o *OrderHandler) ListOrders(c *gin.Context) {
 		return
 	}
 	defer resp.Body.Close()
-	c.JSON(resp.StatusCode, resp)
+	_, err = io.Copy(c.Writer, resp.Body)
 }
 
 // GetOrder godoc
@@ -72,9 +73,9 @@ func (o *OrderHandler) ListOrders(c *gin.Context) {
 // @Accept  json
 // @Produce  json
 // @Param id path string true "Order ID"
-// @Success 200 {object} map[string]interface{}
-// @Failure 400 {object} map[string]interface{}
-// @Failure 500 {object} map[string]interface{}
+// @Success 200 {object} response.Response
+// @Failure 400 {object} response.Response
+// @Failure 500 {object} response.Response
 // @Router /orders/{id} [get]
 func (o *OrderHandler) GetOrder(c *gin.Context) {
 	req, err := http.NewRequest("GET", o.orderUrl+"/"+c.Param("id"), nil)
@@ -89,7 +90,7 @@ func (o *OrderHandler) GetOrder(c *gin.Context) {
 		return
 	}
 	defer resp.Body.Close()
-	c.JSON(resp.StatusCode, resp)
+	_, err = io.Copy(c.Writer, resp.Body)
 }
 
 // UpdateOrder godoc
@@ -100,9 +101,9 @@ func (o *OrderHandler) GetOrder(c *gin.Context) {
 // @Produce  json
 // @Param id path string true "Order ID"
 // @Param order body order.Request true "Order data"
-// @Success 200 {object} map[string]interface{}
-// @Failure 400 {object} map[string]interface{}
-// @Failure 500 {object} map[string]interface{}
+// @Success 200 {object} response.Response
+// @Failure 400 {object} response.Response
+// @Failure 500 {object} response.Response
 // @Router /orders/{id} [put]
 func (o *OrderHandler) UpdateOrder(c *gin.Context) {
 	req, err := http.NewRequest("PUT", o.orderUrl+"/"+c.Param("id"), c.Request.Body)
@@ -117,7 +118,7 @@ func (o *OrderHandler) UpdateOrder(c *gin.Context) {
 		return
 	}
 	defer resp.Body.Close()
-	c.JSON(resp.StatusCode, resp)
+	_, err = io.Copy(c.Writer, resp.Body)
 }
 
 // DeleteOrder godoc
@@ -127,9 +128,9 @@ func (o *OrderHandler) UpdateOrder(c *gin.Context) {
 // @Accept  json
 // @Produce  json
 // @Param id path string true "Order ID"
-// @Success 204 {object} map[string]interface{}
-// @Failure 400 {object} map[string]interface{}
-// @Failure 500 {object} map[string]interface{}
+// @Success 204 {object} response.Response
+// @Failure 400 {object} response.Response
+// @Failure 500 {object} response.Response
 // @Router /orders/{id} [delete]
 func (o *OrderHandler) DeleteOrder(c *gin.Context) {
 	req, err := http.NewRequest("DELETE", o.orderUrl+"/"+c.Param("id"), nil)
@@ -144,7 +145,7 @@ func (o *OrderHandler) DeleteOrder(c *gin.Context) {
 		return
 	}
 	defer resp.Body.Close()
-	c.JSON(resp.StatusCode, resp)
+	_, err = io.Copy(c.Writer, resp.Body)
 }
 
 // SearchOrders godoc
@@ -155,9 +156,9 @@ func (o *OrderHandler) DeleteOrder(c *gin.Context) {
 // @Produce  json
 // @Param filter query string true "Filter"
 // @Param value query string true "Value"
-// @Success 200 {object} map[string]interface{}
-// @Failure 400 {object} map[string]interface{}
-// @Failure 500 {object} map[string]interface{}
+// @Success 200 {object} response.Response
+// @Failure 400 {object} response.Response
+// @Failure 500 {object} response.Response
 // @Router /orders/search [get]
 func (o *OrderHandler) SearchOrders(c *gin.Context) {
 	req, err := http.NewRequest("GET", o.orderUrl+"/search?filter="+c.Query("filter")+"&value="+c.Query("value"), nil)
@@ -172,5 +173,5 @@ func (o *OrderHandler) SearchOrders(c *gin.Context) {
 		return
 	}
 	defer resp.Body.Close()
-	c.JSON(resp.StatusCode, resp)
+	_, err = io.Copy(c.Writer, resp.Body)
 }

@@ -2,6 +2,7 @@ package handler
 
 import (
 	"github.com/gin-gonic/gin"
+	"io"
 	"net/http"
 )
 
@@ -20,9 +21,9 @@ func NewProductHandler(productUrl string) *ProductHandler {
 // @Accept  json
 // @Produce  json
 // @Param product body product.Request true "Product data"
-// @Success 201 {object} map[string]interface{}
-// @Failure 400 {object} map[string]interface{}
-// @Failure 500 {object} map[string]interface{}
+// @Success 201 {object} response.Response
+// @Failure 400 {object} response.Response
+// @Failure 500 {object} response.Response
 // @Router /products [post]
 func (p *ProductHandler) CreateProduct(c *gin.Context) {
 	req, err := http.NewRequest("POST", p.productUrl, c.Request.Body)
@@ -37,7 +38,7 @@ func (p *ProductHandler) CreateProduct(c *gin.Context) {
 		return
 	}
 	defer resp.Body.Close()
-	c.JSON(resp.StatusCode, resp)
+	_, err = io.Copy(c.Writer, resp.Body)
 }
 
 // ListProducts godoc
@@ -46,8 +47,8 @@ func (p *ProductHandler) CreateProduct(c *gin.Context) {
 // @Tags products
 // @Accept  json
 // @Produce  json
-// @Success 200 {object} map[string]interface{}
-// @Failure 500 {object} map[string]interface{}
+// @Success 200 {object} response.Response
+// @Failure 500 {object} response.Response
 // @Router /products [get]
 func (p *ProductHandler) ListProducts(c *gin.Context) {
 	req, err := http.NewRequest("GET", p.productUrl, nil)
@@ -62,7 +63,7 @@ func (p *ProductHandler) ListProducts(c *gin.Context) {
 		return
 	}
 	defer resp.Body.Close()
-	c.JSON(resp.StatusCode, resp)
+	_, err = io.Copy(c.Writer, resp.Body)
 }
 
 // GetProduct godoc
@@ -72,9 +73,9 @@ func (p *ProductHandler) ListProducts(c *gin.Context) {
 // @Accept  json
 // @Produce  json
 // @Param id path string true "Product ID"
-// @Success 200 {object} map[string]interface{}
-// @Failure 400 {object} map[string]interface{}
-// @Failure 500 {object} map[string]interface{}
+// @Success 200 {object} response.Response
+// @Failure 400 {object} response.Response
+// @Failure 500 {object} response.Response
 // @Router /products/{id} [get]
 func (p *ProductHandler) GetProduct(c *gin.Context) {
 	req, err := http.NewRequest("GET", p.productUrl+"/"+c.Param("id"), nil)
@@ -89,7 +90,7 @@ func (p *ProductHandler) GetProduct(c *gin.Context) {
 		return
 	}
 	defer resp.Body.Close()
-	c.JSON(resp.StatusCode, resp)
+	_, err = io.Copy(c.Writer, resp.Body)
 }
 
 // UpdateProduct godoc
@@ -100,9 +101,9 @@ func (p *ProductHandler) GetProduct(c *gin.Context) {
 // @Produce  json
 // @Param id path string true "Product ID"
 // @Param product body product.Request true "Product data"
-// @Success 200 {object} map[string]interface{}
-// @Failure 400 {object} map[string]interface{}
-// @Failure 500 {object} map[string]interface{}
+// @Success 200 {object} response.Response
+// @Failure 400 {object} response.Response
+// @Failure 500 {object} response.Response
 // @Router /products/{id} [put]
 func (p *ProductHandler) UpdateProduct(c *gin.Context) {
 	req, err := http.NewRequest("PUT", p.productUrl+"/"+c.Param("id"), c.Request.Body)
@@ -117,7 +118,7 @@ func (p *ProductHandler) UpdateProduct(c *gin.Context) {
 		return
 	}
 	defer resp.Body.Close()
-	c.JSON(resp.StatusCode, resp)
+	_, err = io.Copy(c.Writer, resp.Body)
 }
 
 // DeleteProduct godoc
@@ -127,9 +128,9 @@ func (p *ProductHandler) UpdateProduct(c *gin.Context) {
 // @Accept  json
 // @Produce  json
 // @Param id path string true "Product ID"
-// @Success 200 {object} map[string]interface{}
-// @Failure 400 {object} map[string]interface{}
-// @Failure 500 {object} map[string]interface{}
+// @Success 200 {object} response.Response
+// @Failure 400 {object} response.Response
+// @Failure 500 {object} response.Response
 // @Router /products/{id} [delete]
 func (p *ProductHandler) DeleteProduct(c *gin.Context) {
 	req, err := http.NewRequest("DELETE", p.productUrl+"/"+c.Param("id"), nil)
@@ -144,7 +145,7 @@ func (p *ProductHandler) DeleteProduct(c *gin.Context) {
 		return
 	}
 	defer resp.Body.Close()
-	c.JSON(resp.StatusCode, resp)
+	_, err = io.Copy(c.Writer, resp.Body)
 }
 
 // SearchProducts godoc
@@ -155,8 +156,8 @@ func (p *ProductHandler) DeleteProduct(c *gin.Context) {
 // @Produce  json
 // @Param filter query string false "Search filter"
 // @Param value query string false "Search value"
-// @Success 200 {object} map[string]interface{}
-// @Failure 500 {object} map[string]interface{}
+// @Success 200 {object} response.Response
+// @Failure 500 {object} response.Response
 // @Router /products/search [get]
 func (p *ProductHandler) SearchProducts(c *gin.Context) {
 	req, err := http.NewRequest("GET", p.productUrl+"/search?filter="+c.Query("filter")+"&value="+c.Query("value"), nil)
@@ -171,5 +172,5 @@ func (p *ProductHandler) SearchProducts(c *gin.Context) {
 		return
 	}
 	defer resp.Body.Close()
-	c.JSON(resp.StatusCode, resp)
+	_, err = io.Copy(c.Writer, resp.Body)
 }

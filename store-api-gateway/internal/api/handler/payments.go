@@ -2,6 +2,7 @@ package handler
 
 import (
 	"github.com/gin-gonic/gin"
+	"io"
 	"net/http"
 )
 
@@ -37,7 +38,7 @@ func (p *PaymentHandler) CreatePayment(c *gin.Context) {
 		return
 	}
 	defer resp.Body.Close()
-	c.JSON(resp.StatusCode, resp)
+	_, err = io.Copy(c.Writer, resp.Body)
 }
 
 // ListPayments godoc
@@ -62,7 +63,7 @@ func (p *PaymentHandler) ListPayments(c *gin.Context) {
 		return
 	}
 	defer resp.Body.Close()
-	c.JSON(resp.StatusCode, resp)
+	_, err = io.Copy(c.Writer, resp.Body)
 }
 
 // GetPayment godoc
@@ -89,7 +90,8 @@ func (p *PaymentHandler) GetPayment(c *gin.Context) {
 		return
 	}
 	defer resp.Body.Close()
-	c.JSON(resp.StatusCode, resp)
+
+	_, err = io.Copy(c.Writer, resp.Body)
 }
 
 // UpdatePayment godoc
@@ -100,9 +102,9 @@ func (p *PaymentHandler) GetPayment(c *gin.Context) {
 // @Produce  json
 // @Param id path string true "Payment ID"
 // @Param payment body payment.Request true "Payment data"
-// @Success 200 {object} map[string]interface{}
-// @Failure 400 {object} map[string]interface{}
-// @Failure 500 {object} map[string]interface{}
+// @Success 200 {object} response.Response
+// @Failure 400 {object} response.Response
+// @Failure 500 {object} response.Response
 // @Router /payments/{id} [put]
 func (p *PaymentHandler) UpdatePayment(c *gin.Context) {
 	req, err := http.NewRequest("PUT", p.paymentUrl+"/"+c.Param("id"), c.Request.Body)
@@ -117,7 +119,8 @@ func (p *PaymentHandler) UpdatePayment(c *gin.Context) {
 		return
 	}
 	defer resp.Body.Close()
-	c.JSON(resp.StatusCode, resp)
+
+	_, err = io.Copy(c.Writer, resp.Body)
 }
 
 // DeletePayment godoc
@@ -127,9 +130,9 @@ func (p *PaymentHandler) UpdatePayment(c *gin.Context) {
 // @Accept  json
 // @Produce  json
 // @Param id path string true "Payment ID"
-// @Success 200 {object} map[string]interface{}
-// @Failure 400 {object} map[string]interface{}
-// @Failure 500 {object} map[string]interface{}
+// @Success 200 {object} response.Response
+// @Failure 400 {object} response.Response
+// @Failure 500 {object} response.Response
 // @Router /payments/{id} [delete]
 func (p *PaymentHandler) DeletePayment(c *gin.Context) {
 	req, err := http.NewRequest("DELETE", p.paymentUrl+"/"+c.Param("id"), nil)
@@ -144,7 +147,7 @@ func (p *PaymentHandler) DeletePayment(c *gin.Context) {
 		return
 	}
 	defer resp.Body.Close()
-	c.JSON(resp.StatusCode, resp)
+	_, err = io.Copy(c.Writer, resp.Body)
 }
 
 // SearchPayments godoc
@@ -155,8 +158,8 @@ func (p *PaymentHandler) DeletePayment(c *gin.Context) {
 // @Produce  json
 // @Param filter query string false "Filter"
 // @Param value query string false "Value"
-// @Success 200 {object} map[string]interface{}
-// @Failure 500 {object} map[string]interface{}
+// @Success 200 {object} response.Response
+// @Failure 500 {object} response.Response
 // @Router /payments/search [get]
 func (p *PaymentHandler) SearchPayments(c *gin.Context) {
 	req, err := http.NewRequest("GET", p.paymentUrl+"/search?"+c.Request.URL.RawQuery, nil)
@@ -171,5 +174,5 @@ func (p *PaymentHandler) SearchPayments(c *gin.Context) {
 		return
 	}
 	defer resp.Body.Close()
-	c.JSON(resp.StatusCode, resp)
+	_, err = io.Copy(c.Writer, resp.Body)
 }

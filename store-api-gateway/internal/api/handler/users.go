@@ -2,6 +2,7 @@ package handler
 
 import (
 	"github.com/gin-gonic/gin"
+	"io"
 	"net/http"
 )
 
@@ -20,12 +21,12 @@ func NewUserHandler(userUrl string) *UserHandler {
 // @Accept  json
 // @Produce  json
 // @Param user body user.Request true "User data"
-// @Success 201 {object} map[string]interface{}
-// @Failure 400 {object} map[string]interface{}
-// @Failure 500 {object} map[string]interface{}
+// @Success 201 {object} response.Response
+// @Failure 400 {object} response.Response
+// @Failure 500 {object} response.Response
 // @Router /users [post]
 func (u *UserHandler) CreateUser(c *gin.Context) {
-	req, err := http.NewRequest("POST", u.userUrl, c.Request.Body)
+	req, err := http.NewRequest(http.MethodPost, u.userUrl, c.Request.Body)
 	if err != nil {
 		c.JSON(500, gin.H{"error": err.Error()})
 		return
@@ -37,7 +38,21 @@ func (u *UserHandler) CreateUser(c *gin.Context) {
 		return
 	}
 	defer resp.Body.Close()
-	c.JSON(resp.StatusCode, resp)
+	if resp.StatusCode == http.StatusTemporaryRedirect {
+		newURL := resp.Header.Get("Location")
+		req, err = http.NewRequest(http.MethodPost, newURL, c.Request.Body)
+		if err != nil {
+			c.JSON(500, gin.H{"error": err.Error()})
+			return
+		}
+		resp, err = client.Do(req)
+		if err != nil {
+			c.JSON(500, gin.H{"error": err.Error()})
+			return
+		}
+		defer resp.Body.Close()
+	}
+	_, err = io.Copy(c.Writer, resp.Body)
 }
 
 // ListUsers godoc
@@ -46,8 +61,8 @@ func (u *UserHandler) CreateUser(c *gin.Context) {
 // @Tags users
 // @Accept  json
 // @Produce  json
-// @Success 200 {object} map[string]interface{}
-// @Failure 500 {object} map[string]interface{}
+// @Success 200 {object} response.Response
+// @Failure 500 {object} response.Response
 // @Router /users [get]
 func (u *UserHandler) ListUsers(c *gin.Context) {
 	req, err := http.NewRequest("GET", u.userUrl, nil)
@@ -62,7 +77,7 @@ func (u *UserHandler) ListUsers(c *gin.Context) {
 		return
 	}
 	defer resp.Body.Close()
-	c.JSON(resp.StatusCode, resp)
+	_, err = io.Copy(c.Writer, resp.Body)
 }
 
 // GetUser godoc
@@ -72,10 +87,10 @@ func (u *UserHandler) ListUsers(c *gin.Context) {
 // @Accept  json
 // @Produce  json
 // @Param id path string true "User ID"
-// @Success 200 {object} map[string]interface{}
-// @Failure 400 {object} map[string]interface{}
-// @Failure 404 {object} map[string]interface{}
-// @Failure 500 {object} map[string]interface{}
+// @Success 200 {object} response.Response
+// @Failure 400 {object} response.Response
+// @Failure 404 {object} response.Response
+// @Failure 500 {object} response.Response
 // @Router /users/{id} [get]
 func (u *UserHandler) GetUser(c *gin.Context) {
 	id := c.Param("id")
@@ -91,7 +106,8 @@ func (u *UserHandler) GetUser(c *gin.Context) {
 		return
 	}
 	defer resp.Body.Close()
-	c.JSON(resp.StatusCode, resp)
+	_, err = io.Copy(c.Writer, resp.Body)
+
 }
 
 // UpdateUser godoc
@@ -102,10 +118,10 @@ func (u *UserHandler) GetUser(c *gin.Context) {
 // @Produce  json
 // @Param id path string true "User ID"
 // @Param user body user.Request true "User data"
-// @Success 200 {object} map[string]interface{}
-// @Failure 400 {object} map[string]interface{}
-// @Failure 404 {object} map[string]interface{}
-// @Failure 500 {object} map[string]interface{}
+// @Success 200 {object} response.Response
+// @Failure 400 {object} response.Response
+// @Failure 404 {object} response.Response
+// @Failure 500 {object} response.Response
 // @Router /users/{id} [put]
 func (u *UserHandler) UpdateUser(c *gin.Context) {
 	id := c.Param("id")
@@ -121,7 +137,7 @@ func (u *UserHandler) UpdateUser(c *gin.Context) {
 		return
 	}
 	defer resp.Body.Close()
-	c.JSON(resp.StatusCode, resp)
+	_, err = io.Copy(c.Writer, resp.Body)
 }
 
 // DeleteUser godoc
@@ -131,10 +147,10 @@ func (u *UserHandler) UpdateUser(c *gin.Context) {
 // @Accept  json
 // @Produce  json
 // @Param id path string true "User ID"
-// @Success 200 {object} map[string]interface{}
-// @Failure 400 {object} map[string]interface{}
-// @Failure 404 {object} map[string]interface{}
-// @Failure 500 {object} map[string]interface{}
+// @Success 200 {object} response.Response
+// @Failure 400 {object} response.Response
+// @Failure 404 {object} response.Response
+// @Failure 500 {object} response.Response
 // @Router /users/{id} [delete]
 func (u *UserHandler) DeleteUser(c *gin.Context) {
 	id := c.Param("id")
@@ -150,7 +166,7 @@ func (u *UserHandler) DeleteUser(c *gin.Context) {
 		return
 	}
 	defer resp.Body.Close()
-	c.JSON(resp.StatusCode, resp)
+	_, err = io.Copy(c.Writer, resp.Body)
 }
 
 // SearchUser godoc
@@ -161,9 +177,9 @@ func (u *UserHandler) DeleteUser(c *gin.Context) {
 // @Produce  json
 // @Param filter query string true "Search filter"
 // @Param value query string true "Search value"
-// @Success 200 {object} map[string]interface{}
-// @Failure 400 {object} map[string]interface{}
-// @Failure 500 {object} map[string]interface{}
+// @Success 200 {object} response.Response
+// @Failure 400 {object} response.Response
+// @Failure 500 {object} response.Response
 // @Router /users/search [get]
 func (u *UserHandler) SearchUser(c *gin.Context) {
 	filter := c.Query("filter")
@@ -180,5 +196,5 @@ func (u *UserHandler) SearchUser(c *gin.Context) {
 		return
 	}
 	defer resp.Body.Close()
-	c.JSON(resp.StatusCode, resp)
+	_, err = io.Copy(c.Writer, resp.Body)
 }
